@@ -10,6 +10,7 @@ import time
 import json
 import re
 import asyncio
+import threading
 from typing import Optional, Dict, Any
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
@@ -18,6 +19,7 @@ from flask import Flask, request
 # ============== CONFIGURATION ==============
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "7950514269:AAElXX262n31xiSn1pCxthxhuMpjw9VjtVg")
 WEBHOOK_URL = os.environ.get("WEBHOOK_URL", "")  # Your Render URL
+PING_INTERVAL = 300  # Ping every 5 minutes (300 seconds)
 
 # Site Configuration
 SITE_URL = "https://infiniteautowerks.com"
@@ -43,6 +45,27 @@ COUNTRY_MAP = {
     'HU': 'Hungary', 'IE': 'Ireland', 'NZ': 'New Zealand', 'HK': 'Hong Kong',
     'TW': 'Taiwan', 'KE': 'Kenya', 'GH': 'Ghana', 'MA': 'Morocco'
 }
+
+
+# ============== KEEP ALIVE SYSTEM ==============
+def keep_alive():
+    """Self-ping to keep Render free tier awake"""
+    while True:
+        time.sleep(PING_INTERVAL)
+        if WEBHOOK_URL:
+            try:
+                response = requests.get(f"{WEBHOOK_URL}/ping", timeout=10)
+                print(f"[Keep-Alive] Ping sent - Status: {response.status_code}")
+            except Exception as e:
+                print(f"[Keep-Alive] Ping failed: {e}")
+
+
+def start_keep_alive():
+    """Start the keep-alive thread"""
+    if WEBHOOK_URL:
+        thread = threading.Thread(target=keep_alive, daemon=True)
+        thread.start()
+        print("[Keep-Alive] Thread started")
 
 
 class StripeWooCommerceAutomation:
@@ -471,6 +494,12 @@ def home():
     return "🤖 Stripe Checker Bot is running!"
 
 
+@app.route('/ping')
+def ping():
+    """Keep-alive endpoint"""
+    return "pong", 200
+
+
 @app.route('/webhook', methods=['POST'])
 def webhook():
     """Handle incoming Telegram updates via webhook"""
@@ -511,6 +540,9 @@ setup_application()
 
 if __name__ == "__main__":
     if WEBHOOK_URL:
+        # Start keep-alive thread
+        start_keep_alive()
+        
         # For Render - Flask handles requests via gunicorn
         print(f"Starting in webhook mode...")
         print(f"Visit {WEBHOOK_URL}/setwebhook to configure the webhook")
