@@ -14,7 +14,7 @@ import telebot  # pip install pyTelegramBotAPI flask requests
 # ------------------------------------------------------------------------------------------
 # Replace with your actual values
 BOT_TOKEN = "7950514269:AAElXX262n31xiSn1pCxthxhuMpjw9VjtVg"
-OWNER_ID = 0  # <--- REPLACE WITH YOUR TELEGRAM USER ID (Integer)
+OWNER_ID = 8241973550  # <--- REPLACE WITH YOUR TELEGRAM USER ID (Integer)
 # Example: OWNER_ID = 123456789
 
 # File to store allowed users (Note: On Render Free, this resets on redeploy)
@@ -395,3 +395,4 @@ if __name__ == "__main__":
 
     print("🤖 Bot Started...")
     bot.infinity_polling()
+
