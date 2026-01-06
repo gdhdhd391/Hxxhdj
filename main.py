@@ -230,7 +230,19 @@ def parse_card_pipe(text):
 
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
-    bot.reply_to(message, "🚀 Stripe Auth Bot Ready!\n\nUse /chk cc|mm|yy|cvc to check a card.\nExample: `/chk 4000000000000000|01|25|123`")
+    welcome_text = (
+        "🔥 *Stripe Auth Checker Bot* 🔥\n\n"
+        "Welcome! This high-speed bot checks cards using Stripe Auth & WooCommerce Setup Intents.\n\n"
+        "⚠️ *Access Restricted*\n"
+        "This is a private bot. To gain access, you must contact the owner.\n\n"
+        "💎 *Pricing & Offers*\n"
+        "• *Access*: Message for approval.\n"
+        "• *Personal Bot*: Want your own private checker? Pay *$5* to the owner and get a custom setup!\n\n"
+        "👤 *Contact Owner*: @llegaccy\n\n"
+        "👇 *How to Use*:\n"
+        "`/chk cc|mm|yy|cvc`"
+    )
+    bot.reply_to(message, welcome_text, parse_mode='Markdown')
 
 @bot.message_handler(commands=['chk'])
 def check_card_command(message):
