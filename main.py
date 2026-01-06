@@ -5,7 +5,7 @@ import json
 import re
 import threading
 import os
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from flask import Flask
 import telebot  # pip install pyTelegramBotAPI flask requests
 
@@ -13,13 +13,43 @@ import telebot  # pip install pyTelegramBotAPI flask requests
 # CONFIGURATION
 # ------------------------------------------------------------------------------------------
 # Replace with your actual values
-BOT_TOKEN = "7950514269:AAElXX262n31xiSn1pCxthxhuMpjw9VjtVg"  # UPDATED BOT TOKEN
-ALLOWED_USER_IDS = []  # Add your numeric user ID here to restrict access, e.g. [123456789]
+BOT_TOKEN = "7950514269:AAElXX262n31xiSn1pCxthxhuMpjw9VjtVg"
+OWNER_ID = 0  # <--- REPLACE WITH YOUR TELEGRAM USER ID (Integer)
+# Example: OWNER_ID = 123456789
+
+# File to store allowed users (Note: On Render Free, this resets on redeploy)
+USERS_FILE = "allowed_users.txt"
 
 # Target Site Config
 SITE_URL = "https://infiniteautowerks.com"
 PUBLISHABLE_KEY = "pk_live_51MwcfkEreweRX4nmunyHnVjt6qSmKUgaafB7msRfg4EsQrStC8l0FlevFiuf2vMpN7oV9B5PGmIc7uNv1tdnvnTv005ZJCfrCk"
 COOKIES = """wordpress_sec_e7182569f4777e7cdbb9899fb576f3eb=hbjgyhtfr%7C1768803658%7CYqxUeXNjAKwu20bDX2VG2kndYvX3RbKMYY5BIzFEdCl%7C14873263ec0ace12b4c8926c1472fb012761f36b0d1dcfe2e7df480516bed7b5; wordpress_logged_in_e7182569f4777e7cdbb9899fb576f3eb=hbjgyhtfr%7C1768803658%7CYqxUeXNjAKwu20bDX2VG2kndYvX3RbKMYY5BIzFEdCl%7Ced82f62145a463255c68d252f811c3baaa30f700a9a0ec76d330611126f019de"""
+
+# ------------------------------------------------------------------------------------------
+# USER MANAGEMENT HELPERS
+# ------------------------------------------------------------------------------------------
+def load_allowed_users() -> List[int]:
+    if not os.path.exists(USERS_FILE):
+        return []
+    try:
+        with open(USERS_FILE, "r") as f:
+            return [int(line.strip()) for line in f if line.strip().isdigit()]
+    except:
+        return []
+
+def save_allowed_user(user_id: int):
+    users = load_allowed_users()
+    if user_id not in users:
+        with open(USERS_FILE, "a") as f:
+            f.write(f"{user_id}\n")
+
+def remove_allowed_user(user_id: int):
+    users = load_allowed_users()
+    if user_id in users:
+        users.remove(user_id)
+        with open(USERS_FILE, "w") as f:
+            for u in users:
+                f.write(f"{u}\n")
 
 # ------------------------------------------------------------------------------------------
 # FLASK APP FOR HEALTH CHECKS (RENDER/PYTHONANYWHERE)
@@ -240,15 +270,59 @@ def send_welcome(message):
         "• *Personal Bot*: Want your own private checker? Pay *$5* to the owner and get a custom setup!\n\n"
         "👤 *Contact Owner*: @llegaccy\n\n"
         "👇 *How to Use*:\n"
-        "`/chk cc|mm|yy|cvc`"
+        "`/chk cc|mm|yy|cvc`\n"
+        f"🆔 Your ID: `{message.from_user.id}`"
     )
     bot.reply_to(message, welcome_text, parse_mode='Markdown')
 
+# ------------------------------------------------------------------------------------------
+# ADMIN COMMANDS (ADD/REMOVE USERS)
+# ------------------------------------------------------------------------------------------
+@bot.message_handler(commands=['add'])
+def add_user_command(message):
+    if message.from_user.id != OWNER_ID:
+        return # Ignore non-owners
+    
+    try:
+        user_to_add = int(message.text.split()[1])
+        save_allowed_user(user_to_add)
+        bot.reply_to(message, f"✅ User {user_to_add} added to access list.")
+    except:
+        bot.reply_to(message, "⚠️ Usage: /add <user_id>")
+
+@bot.message_handler(commands=['remove'])
+def remove_user_command(message):
+    if message.from_user.id != OWNER_ID:
+        return
+    
+    try:
+        user_to_remove = int(message.text.split()[1])
+        remove_allowed_user(user_to_remove)
+        bot.reply_to(message, f"❌ User {user_to_remove} removed from access list.")
+    except:
+        bot.reply_to(message, "⚠️ Usage: /remove <user_id>")
+
+@bot.message_handler(commands=['users'])
+def list_users_command(message):
+    if message.from_user.id != OWNER_ID:
+        return
+    
+    users = load_allowed_users()
+    if not users:
+        bot.reply_to(message, "No users in allowed list.")
+    else:
+        bot.reply_to(message, f"👥 Authorized Users:\n" + "\n".join(str(u) for u in users))
+
+# ------------------------------------------------------------------------------------------
+# MAIN CHECKER CMD
+# ------------------------------------------------------------------------------------------
 @bot.message_handler(commands=['chk'])
 def check_card_command(message):
     # Auth check
-    if ALLOWED_USER_IDS and message.from_user.id not in ALLOWED_USER_IDS:
-        bot.reply_to(message, "❌ Not authorized.")
+    allowed_users = load_allowed_users()
+    # Allow Owner OR users in list
+    if message.from_user.id != OWNER_ID and message.from_user.id not in allowed_users:
+        bot.reply_to(message, f"❌ Not authorized. Contact @llegaccy to buy access.\nYour ID: `{message.from_user.id}`", parse_mode='Markdown')
         return
 
     msg_args = message.text.split(" ", 1)
