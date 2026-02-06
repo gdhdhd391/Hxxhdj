@@ -21,7 +21,7 @@ USERS_FILE = "allowed_users.txt"
 # Target Site Config
 SITE_URL = "https://infiniteautowerks.com"
 PUBLISHABLE_KEY = "pk_live_51MwcfkEreweRX4nmunyHnVjt6qSmKUgaafB7msRfg4EsQrStC8l0FlevFiuf2vMpN7oV9B5PGmIc7uNv1tdnvnTv005ZJCfrCk"
-COOKIES = """wordpress_sec_e7182569f4777e7cdbb9899fb576f3eb=gtfr%7C1770178761%7C1Z4vr5jEPFY8BnVkhQUxKqJb9AHn8KtA1WAiYPOpgNk%7Cbab8b45235d97384da36d63a3d3156a322f8d00c5553908e4798e800bcf6baf3; checkout_continuity_service=18e8439a-8c0a-4282-baa5-c8730e006a98; tk_or=%22https%3A%2F%2Fwww.google.com%2F%22; tk_lr=%22https%3A%2F%2Fwww.google.com%2F%22; tk_ai=6sMD0NBiyoixEIz1kD7cwKDv; __stripe_mid=a7dc99f3-7ed5-4c61-a39f-d169213f19fda0531d; wordpress_logged_in_e7182569f4777e7cdbb9899fb576f3eb=gtfr%7C1770178761%7C1Z4vr5jEPFY8BnVkhQUxKqJb9AHn8KtA1WAiYPOpgNk%7Cd10c4724e23442755b948c7ceeb887a8fccbf1ed7fc48f4825357624211b1d71; __cf_bm=Y9a_kVSS_6rHH_WpFqvvL4gpvXqT0hxjL9nT4EP5wmA-1769142171-1.0.1.1-oukQTL.0IOntwz67yM69e2YmiFI14iCOYxnlhTquR_B2TPVQjYRXsQfL9vnJICcCf2TNl3bRgzV0PrnzI4sZnah.sPtijy6m8egKoB3dn4o; sbjs_migrations=1418474375998%3D1; sbjs_current_add=fd%3D2026-01-23%2003%3A52%3A53%7C%7C%7Cep%3Dhttps%3A%2F%2Finfiniteautowerks.com%2Fmy-account%2Fadd-payment-method%2F%7C%7C%7Crf%3D%28none%29; sbjs_first_add=fd%3D2026-01-23%2003%3A52%3A53%7C%7C%7Cep%3Dhttps%3A%2F%2Finfiniteautowerks.com%2Fmy-account%2Fadd-payment-method%2F%7C%7C%7Crf%3D%28none%29; sbjs_current=typ%3Dtypein%7C%7C%7Csrc%3D%28direct%29%7C%7C%7Cmdm%3D%28none%29%7C%7C%7Ccmp%3D%28none%29%7C%7C%7Ccnt%3D%28none%29%7C%7C%7Ctrm%3D%28none%29%7C%7C%7Cid%3D%28none%29%7C%7C%7Cplt%3D%28none%29%7C%7C%7Cfmt%3D%28none%29%7C%7C%7Ctct%3D%28none%29; sbjs_first=typ%3Dtypein%7C%7C%7Csrc%3D%28direct%29%7C%7C%7Cmdm%3D%28none%29%7C%7C%7Ccmp%3D%28none%29%7C%7C%7Ccnt%3D%28none%29%7C%7C%7Ctrm%3D%28none%29%7C%7C%7Cid%3D%28none%29%7C%7C%7Cplt%3D%28none%29%7C%7C%7Cfmt%3D%28none%29%7C%7C%7Ctct%3D%28none%29; sbjs_udata=vst%3D1%7C%7C%7Cuip%3D%28none%29%7C%7C%7Cuag%3DMozilla%2F5.0%20%28Windows%20NT%2010.0%3B%20Win64%3B%20x64%29%20AppleWebKit%2F537.36%20%28KHTML%2C%20like%20Gecko%29%20Chrome%2F143.0.0.0%20Safari%2F537.36; sbjs_session=pgs%3D1%7C%7C%7Ccpg%3Dhttps%3A%2F%2Finfiniteautowerks.com%2Fmy-account%2Fadd-payment-method%2F; tk_qs=; __stripe_sid=81772e11-a027-4b3a-8f62-dfd1da3c8b46d319a9"""
+COOKIES = """wordpress_sec_e7182569f4777e7cdbb9899fb576f3eb=gtfh%7C1771569579%7C7UOaNyph16xXcSvmSj2q4lPTUBqUcSTkHXcJ9C6p9ge%7Cb662a3c9cb4dcadf4eb135355d590f5e7c6c7225a7146a780b7e3ede8a015c99; checkout_continuity_service=18e8439a-8c0a-4282-baa5-c8730e006a98; tk_or=%22https%3A%2F%2Fwww.google.com%2F%22; tk_lr=%22https%3A%2F%2Fwww.google.com%2F%22; tk_ai=6sMD0NBiyoixEIz1kD7cwKDv; __stripe_mid=a7dc99f3-7ed5-4c61-a39f-d169213f19fda0531d; __cf_bm=TAOzDweUql2h0LnacTYHEvHWIJj1tfhD6EdsHtjFUuY-1770359943-1.0.1.1-y6FySHSp5Bgpw_s4yucyQboy8tdyci5EX4ahDu4eO8oAzNDYKy6ppvhD39_8hNNLk1qL2H7o4eF_NSzh9lFHqw3_.dkG1sn7VtevTPBOifE; sbjs_migrations=1418474375998%3D1; sbjs_current_add=fd%3D2026-02-06%2006%3A09%3A22%7C%7C%7Cep%3Dhttps%3A%2F%2Finfiniteautowerks.com%2Fmy-account%2Fadd-payment-method%2F%7C%7C%7Crf%3D%28none%29; sbjs_first_add=fd%3D2026-02-06%2006%3A09%3A22%7C%7C%7Cep%3Dhttps%3A%2F%2Finfiniteautowerks.com%2Fmy-account%2Fadd-payment-method%2F%7C%7C%7Crf%3D%28none%29; sbjs_current=typ%3Dtypein%7C%7C%7Csrc%3D%28direct%29%7C%7C%7Cmdm%3D%28none%29%7C%7C%7Ccmp%3D%28none%29%7C%7C%7Ccnt%3D%28none%29%7C%7C%7Ctrm%3D%28none%29%7C%7C%7Cid%3D%28none%29%7C%7C%7Cplt%3D%28none%29%7C%7C%7Cfmt%3D%28none%29%7C%7C%7Ctct%3D%28none%29; sbjs_first=typ%3Dtypein%7C%7C%7Csrc%3D%28direct%29%7C%7C%7Cmdm%3D%28none%29%7C%7C%7Ccmp%3D%28none%29%7C%7C%7Ccnt%3D%28none%29%7C%7C%7Ctrm%3D%28none%29%7C%7C%7Cid%3D%28none%29%7C%7C%7Cplt%3D%28none%29%7C%7C%7Cfmt%3D%28none%29%7C%7C%7Ctct%3D%28none%29; sbjs_udata=vst%3D1%7C%7C%7Cuip%3D%28none%29%7C%7C%7Cuag%3DMozilla%2F5.0%20%28Windows%20NT%2010.0%3B%20Win64%3B%20x64%29%20AppleWebKit%2F537.36%20%28KHTML%2C%20like%20Gecko%29%20Chrome%2F144.0.0.0%20Safari%2F537.36; __stripe_sid=bf16695b-1bcf-4c56-968a-6cf5df8e6e6ad9b5a0; wordpress_logged_in_e7182569f4777e7cdbb9899fb576f3eb=gtfh%7C1771569579%7C7UOaNyph16xXcSvmSj2q4lPTUBqUcSTkHXcJ9C6p9ge%7Cb662a3c9cb4dcadf4eb135355d590f5e7c6c7225a7146a780b7e3ede8a015c99; sbjs_session=pgs%3D2%7C%7C%7Ccpg%3Dhttps%3A%2F%2Finfiniteautowerks.com%2Fmy-account%2Fadd-payment-method%2F; tk_qs="""
 
 # Auto-delete cards after check (set to False to keep cards)
 AUTO_DELETE_CARDS = True
@@ -258,13 +258,13 @@ class StripeWooCommerceAutomation:
             'origin': 'https://js.stripe.com',
             'priority': 'u=1, i',
             'referer': 'https://js.stripe.com/',
-            'sec-ch-ua': '"Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24"',
+            'sec-ch-ua': '"Not(A:Brand";v="8", "Chromium";v="144", "Google Chrome";v="144"',
             'sec-ch-ua-mobile': '?0',
             'sec-ch-ua-platform': '"Windows"',
             'sec-fetch-dest': 'empty',
             'sec-fetch-mode': 'cors',
             'sec-fetch-site': 'same-site',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36'
         }
         session_ids = self._generate_session_ids()
         data = {
@@ -279,7 +279,7 @@ class StripeWooCommerceAutomation:
             'guid': session_ids['guid'],
             'muid': session_ids['muid'],
             'sid': session_ids['sid'],
-            'payment_user_agent': 'stripe.js/43a1cb09b6; stripe-js-v3/43a1cb09b6; payment-element; deferred-intent'
+            'payment_user_agent': 'stripe.js/3233cbd46e; stripe-js-v3/3233cbd46e; payment-element; deferred-intent'
         }
         try:
             response = requests.post(url, headers=headers, data=data, timeout=30)
@@ -305,13 +305,13 @@ class StripeWooCommerceAutomation:
             'origin': self.site_url,
             'priority': 'u=1, i',
             'referer': f'{self.site_url}/my-account/add-payment-method/',
-            'sec-ch-ua': '"Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24"',
+            'sec-ch-ua': '"Not(A:Brand";v="8", "Chromium";v="144", "Google Chrome";v="144"',
             'sec-ch-ua-mobile': '?0',
             'sec-ch-ua-platform': '"Windows"',
             'sec-fetch-dest': 'empty',
             'sec-fetch-mode': 'cors',
             'sec-fetch-site': 'same-origin',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36',
             'x-requested-with': 'XMLHttpRequest'
         }
         data = {
